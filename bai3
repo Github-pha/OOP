@@ -1,0 +1,231 @@
+#include <iostream>
+using namespace std;
+
+class DonThuc
+{
+private:
+	double HeSo;
+	int SoMu;
+	DonThuc* pNext;
+public:
+	DonThuc();
+	DonThuc(double h, int m);
+	DonThuc*& DonThucKeTiep();
+	double LayHeSo();
+	int LaySoMu();
+	void NhapDonThuc();
+	void XuatDonThuc();
+	void GanHeSo(int h);
+	void GanSoMu(int m);
+	double TinhGiaTri(double x);
+	~DonThuc();
+};
+
+DonThuc::DonThuc() {
+	HeSo = 1;
+	SoMu = 1;
+	pNext = NULL;
+}
+
+DonThuc::DonThuc(double h, int m) {
+	HeSo = h;
+	SoMu = m;
+	pNext = NULL;
+}
+
+void DonThuc::NhapDonThuc() {
+	cout << "Nhap he so: ";
+	cin >> HeSo;
+	cout << "Nhap mu so: ";
+	cin >> SoMu;
+	pNext = NULL;
+}
+
+void DonThuc::XuatDonThuc()
+{
+	if (HeSo > 0)
+		cout << " + " << HeSo << "x^" << SoMu;
+	else {
+		cout << " - " << -HeSo << "x^" << SoMu;
+	}
+}
+
+DonThuc*& DonThuc::DonThucKeTiep() {
+	return pNext;
+}
+
+double DonThuc::LayHeSo()
+{
+	return HeSo;
+}
+
+int DonThuc::LaySoMu() {
+	return SoMu;
+}
+
+void DonThuc::GanHeSo(int h) {
+	HeSo = h;
+}
+
+void DonThuc::GanSoMu(int m) {
+	SoMu = m;
+}
+
+double DonThuc::TinhGiaTri(double x) {
+	return HeSo * pow(x, SoMu);
+}
+
+DonThuc::~DonThuc() {
+	pNext = NULL;
+	HeSo = 0;
+	SoMu = 0;
+}
+
+class DaThuc
+{
+private:
+	DonThuc* pHead;
+	DonThuc* pTail;
+public:
+	DaThuc();
+	void NhapDaThuc();
+	void XuatDaThuc();
+	double TinhGiaTri(double x);
+	DaThuc& operator+(DonThuc x);
+	DaThuc& operator-(DonThuc x);
+	DaThuc& operator*(DonThuc x);
+	DaThuc& operator/(DonThuc x);
+	~DaThuc();
+};
+
+DaThuc::DaThuc() {
+	pHead = NULL;
+	pTail = NULL;
+}
+
+void DaThuc::NhapDaThuc() {
+	int exit = 0;
+	do {
+		double h;
+		int m;
+		cout << "Nhap he so don thuc: ";
+		cin >> h;
+		cout << "Nhap mu so don thuc: ";
+		cin >> m;
+
+		DonThuc* p = new DonThuc(h, m);
+
+		if (pHead == NULL) {
+			pHead = p;
+			pTail = p;
+		}
+		else if (pHead->DonThucKeTiep() == NULL) {
+			pHead->DonThucKeTiep() = p;
+			pTail = p;
+		}
+		else
+		{
+			pTail->DonThucKeTiep() = p;
+			pTail = p;
+		}
+		cout << "0. Tiep tuc nhap. \n1. Thoat. \n";
+		cin >> exit;
+	} while (exit == 0);
+}
+
+void DaThuc::XuatDaThuc() {
+	if (pHead != NULL) {
+		cout << pHead->LayHeSo() << "x^" << pHead->LaySoMu();
+		DonThuc* p = pHead->DonThucKeTiep();
+		while (p) {
+			p->XuatDonThuc();
+			p = p->DonThucKeTiep();
+		}
+		cout << endl;
+	}
+}
+
+double DaThuc::TinhGiaTri(double x) {
+	double sum = 0;
+	DonThuc* p = pHead;
+	while (p) {
+		sum += p->TinhGiaTri(x);
+		p = p->DonThucKeTiep();
+	}
+	return sum;
+}
+
+DaThuc& DaThuc::operator+(DonThuc x) {
+	DonThuc* p = new DonThuc(x.LayHeSo(), x.LaySoMu());
+	pTail->DonThucKeTiep() = p;
+	pTail = p;
+	return *this;
+}
+
+DaThuc& DaThuc::operator-(DonThuc x) {
+	DonThuc* p = new DonThuc(-x.LayHeSo(), x.LaySoMu());
+	pTail->DonThucKeTiep() = p;
+	pTail = p;
+	return *this;
+}
+
+DaThuc& DaThuc::operator*(DonThuc x) {
+	DonThuc* q = new DonThuc(x.LayHeSo(), x.LaySoMu());
+	DonThuc* p = pHead;
+	while (p) {
+		p->GanHeSo(p->LayHeSo() * q->LayHeSo());
+		p->GanSoMu(p->LaySoMu() + q->LaySoMu());
+		p = p->DonThucKeTiep();
+	}
+	return *this;
+}
+
+DaThuc& DaThuc::operator/(DonThuc x) {
+	DonThuc* q = new DonThuc(x.LayHeSo(), x.LaySoMu());
+	DonThuc* p = pHead;
+	while (p) {
+		p->GanHeSo(p->LayHeSo() / q->LayHeSo());
+		p->GanSoMu(p->LaySoMu() - q->LaySoMu());
+		p = p->DonThucKeTiep();
+	}
+	return *this;
+}
+
+DaThuc::~DaThuc() {
+	while (pHead) {
+		DonThuc* p = pHead->DonThucKeTiep();
+		delete pHead;
+		pHead = p;
+	}
+	pHead = NULL;
+	pTail = NULL;
+}
+
+int main() {
+	cout << " ========== DA THUC ============\n";
+	DaThuc y;
+	y.NhapDaThuc();
+	y.XuatDaThuc();
+	cout << "\nTinh gia tri da thuc f(x) voi x = ";
+	double x;
+	cin >> x;
+	cout << "f(" << x << ")= " << y.TinhGiaTri(x) << endl;
+
+	cout << "Phep cong da thuc y voi don thuc k(x) = x^2\n";
+	DonThuc k(1, 2);
+	y = y + k;
+	y.XuatDaThuc();
+	cout << "Phep tru da thuc y voi don thuc l(x) = 5x^4\n";
+	DonThuc l(5, 4);
+	y = y - l;
+	y.XuatDaThuc();
+	cout << "Phep nhan da thuc y voi don thuc m(x) = 2x^2\n";
+	DonThuc m(2, 2);
+	y = y * m;
+	y.XuatDaThuc();
+	cout << "Phep chia da thuc y voi don thuc n(x) = x\n";
+	DonThuc n(1, 1);
+	y = y / n;
+	y.XuatDaThuc();
+	return 1;
+}
